@@ -1,5 +1,6 @@
 package utils;
 
+import io.qameta.allure.Step;
 import io.restassured.response.Response;
 
 import static utils.UserCreds.credsFromUser;
@@ -7,6 +8,7 @@ import static io.restassured.RestAssured.given;
 
 public class UserClient {
 
+    @Step("Регистрация пользователя")
     public Response create(User user) {
         return given()
                 .header("Content-type", "application/json")
@@ -16,6 +18,7 @@ public class UserClient {
                 .post("api/auth/register");
     }
 
+    @Step("Авторизация пользователя")
     public Response login(User user) {
         return given()
                 .header("Content-type", "application/json")
@@ -25,6 +28,7 @@ public class UserClient {
                 .post("api/auth/login");
     }
 
+    @Step("Удаление пользователя")
     public Response delete(String accessToken) {
         return given()
                 .header("Content-type", "application/json")

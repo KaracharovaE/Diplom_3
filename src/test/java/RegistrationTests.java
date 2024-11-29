@@ -1,5 +1,4 @@
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.After;
 import org.junit.Before;
@@ -18,7 +17,6 @@ import static org.junit.Assert.assertEquals;
 
 public class RegistrationTests extends BaseTest {
 
-    private static final String BASE_URL = "https://stellarburgers.nomoreparties.site/";
     private MainPage objMainPage;
     private LoginPage objLoginPage;
     private RegistrationPage objRegistrationPage;
@@ -67,7 +65,6 @@ public class RegistrationTests extends BaseTest {
     private void registerUser(String name, String email, String password) {
         navigateToRegistrationPage();
         objRegistrationPage.register(name, email, password);
-        // Сохраните токен пользователя после регистрации
         userToken = getUserToken(email, password);
     }
 
@@ -80,18 +77,12 @@ public class RegistrationTests extends BaseTest {
     @After
     public void tearDown() {
         if (userToken != null) {
-            deleteUser(userToken);
+            userClient.delete(userToken);
         }
         super.tearDown();
     }
 
-    @Step("Удаление пользователя с токеном: {token}")
-    private void deleteUser(String token) {
-        userClient.delete(token);
-    }
-
     private String getUserToken(String email, String password) {
-        RestAssured.baseURI = "https://stellarburgers.nomoreparties.site/";
         User user = new User();
         user.setEmail(email);
         user.setPassword(password);

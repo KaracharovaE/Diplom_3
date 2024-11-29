@@ -1,15 +1,12 @@
 import io.qameta.allure.junit4.DisplayName;
 import org.junit.Before;
 import org.junit.Test;
-
 import pageobject.MainPage;
 
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.assertTrue;
 
 public class TransitionsToBurgerFillingSectionsTests extends BaseTest {
 
-    private static final String BASE_URL = "https://stellarburgers.nomoreparties.site/";
     private MainPage objMainPage;
 
     @Override
@@ -22,29 +19,24 @@ public class TransitionsToBurgerFillingSectionsTests extends BaseTest {
 
     @Test
     @DisplayName("Успешный переход к разделу Булки")
-    public void clickOnBunsButton() {
-        objMainPage.clickSaucesButton();
+    public void successfulTransitionsToBunsSection() {
+        objMainPage.scrollToSauce();
+        objMainPage.scrollToBun();
         objMainPage.clickBunsButton();
-        String expected = "Флюоресцентная булка R2-D3";
-        String actual = objMainPage.getBun();
-        assertEquals(expected, actual);
+        assertTrue(objMainPage.isBunActive());
     }
 
     @Test
     @DisplayName("Успешный переход к разделу Соусы")
-    public void clickOnSaucesButton() {
-        objMainPage.clickSaucesButton();
-        String expected = "Соус с шипами Антарианского плоскоходца";
-        String actual = objMainPage.getSauce();
-        assertEquals(expected, actual);
+    public void successfulTransitionsToSaucesSection() {
+        objMainPage.scrollToSauce();
+        assertTrue(objMainPage.isSauceActive());
     }
 
     @Test
     @DisplayName("Успешный переход к разделу Начинки")
-    public void clickOnFillingsButton() {
-        objMainPage.clickFillingsButton();
-        String expected = "Биокотлета из марсианской Магнолии";
-        String actual = objMainPage.getFilling();
-        assertEquals(expected, actual);
+    public void successfulTransitionsToFillingsSection() {
+        objMainPage.scrollToFilling();
+        assertTrue(objMainPage.isFillingActive());
     }
 }

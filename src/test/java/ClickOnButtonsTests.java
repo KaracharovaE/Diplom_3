@@ -1,13 +1,9 @@
-import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import pageobject.LoginPage;
 import pageobject.MainPage;
 import pageobject.PersonalAccountPage;
@@ -16,14 +12,11 @@ import utils.User;
 import utils.UserClient;
 import utils.UserGenerator;
 
-import java.time.Duration;
-
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.junit.Assert.assertEquals;
 
 public class ClickOnButtonsTests extends BaseTest {
 
-    private static final String BASE_URL = "https://stellarburgers.nomoreparties.site/";
     private MainPage objMainPage;
     private LoginPage objLoginPage;
     private RegistrationPage objRegistrationPage;
@@ -44,7 +37,6 @@ public class ClickOnButtonsTests extends BaseTest {
         objRegistrationPage = new RegistrationPage(driver);
         userClient = new UserClient();
 
-        RestAssured.baseURI = "https://stellarburgers.nomoreparties.site/";
         User user = UserGenerator.randomUser();
         Response response = userClient.create(user);
         assertEquals(SC_OK, response.statusCode());
@@ -56,67 +48,54 @@ public class ClickOnButtonsTests extends BaseTest {
     @Test
     @DisplayName("Переход в личный кабинет")
     public void clickOnPersonalAccount() {
-        navigateToMainPage();
-        loginUser();
-        accessPersonalAccount();
+        objRegistrationPage.clickLogoButton();
+        objMainPage.clickLoginButton();
+        objLoginPage.login(email, password);
+        objMainPage.clickPersonalAccountButton();
 
+        objPersonalAccountPage.waitExitButton();
         String expected = "Выход";
         String actual = objPersonalAccountPage.waitExitButton();
         assertEquals(expected, actual);
     }
 
-    @Step("Переход на главную страницу")
-    private void navigateToMainPage() {
-        objRegistrationPage.clickLogoButton();
-    }
-
-    @Step("Авторизация пользователя")
-    private void loginUser() {
-        objMainPage.clickLoginButton();
-        objLoginPage.login(email, password);
-    }
-
-    @Step("Доступ к личному кабинету")
-    private void accessPersonalAccount() {
-        objMainPage.clickPersonalAccountButton();
-    }
-
     @Test
     @DisplayName("Переход из личного кабинета в конструктор ")
     public void clickOnConstructorButton() {
-        navigateToMainPage();
-        loginUser();
-        accessPersonalAccount();
+        objRegistrationPage.clickLogoButton();
+        objMainPage.clickLoginButton();
+        objLoginPage.login(email, password);
+        objMainPage.clickPersonalAccountButton();
 
         objPersonalAccountPage.clickConstructorButton();
-        String expected = "Флюоресцентная булка R2-D3";
-        String actual = objMainPage.getBun();
+        String expected = "Булки";
+        String actual = objMainPage.getBunsButton();
         assertEquals(expected, actual);
     }
 
     @Test
     @DisplayName("Переход из личного кабинета на логотип Stellar Burgers")
     public void clickOnLogoButton() {
-        navigateToMainPage();
-        loginUser();
-        accessPersonalAccount();
+        objRegistrationPage.clickLogoButton();
+        objMainPage.clickLoginButton();
+        objLoginPage.login(email, password);
+        objMainPage.clickPersonalAccountButton();
 
         objPersonalAccountPage.clickLogoButton();
-        String expected = "Флюоресцентная булка R2-D3";
-        String actual = objMainPage.getBun();
+        String expected = "Булки";
+        String actual = objMainPage.getBunsButton();
         assertEquals(expected, actual);
     }
 
     @Test
     @DisplayName("Выход из аккаунта")
     public void clickOnExitButton() {
-        navigateToMainPage();
-        loginUser();
-        accessPersonalAccount();
+        objRegistrationPage.clickLogoButton();
+        objMainPage.clickLoginButton();
+        objLoginPage.login(email, password);
+        objMainPage.clickPersonalAccountButton();
 
-        new WebDriverWait(driver, Duration.ofSeconds(10)).until(
-                ExpectedConditions.urlToBe("https://stellarburgers.nomoreparties.site/account/profile")
-        );
+        objPersonalAccountPage.waitVisibilityExitButton();
         objPersonalAccountPage.clickExitButton();
         String expected = "Войти";
         String actual = objLoginPage.getLoginButton();
@@ -126,14 +105,9 @@ public class ClickOnButtonsTests extends BaseTest {
     @After
     public void tearDown() {
         if (userToken != null) {
-            deleteUser(userToken);
+            userClient.delete(userToken);
         }
         super.tearDown();
-    }
-
-    @Step("Удаление пользователя с токеном: {token}")
-    private void deleteUser(String token) {
-        userClient.delete(token);
     }
 
     private String getUserToken(String email, String password) {

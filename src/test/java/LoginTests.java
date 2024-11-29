@@ -1,6 +1,5 @@
 import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.After;
 import org.junit.Before;
@@ -14,11 +13,11 @@ import static org.apache.http.HttpStatus.SC_OK;
 import static org.junit.Assert.assertEquals;
 
 public class LoginTests extends BaseTest {
-    private static final String BASE_URL = "https://stellarburgers.nomoreparties.site/";
+
     private MainPage objMainPage;
     private LoginPage objLoginPage;
     private RegistrationPage objRegistrationPage;
-    private PersonalAccountPage objPersonalAccountPage;
+
     private UserClient userClient;
     private String email;
     private String password;
@@ -33,9 +32,7 @@ public class LoginTests extends BaseTest {
         objLoginPage = new LoginPage(driver);
         objMainPage = new MainPage(driver);
         objRegistrationPage = new RegistrationPage(driver);
-        objPersonalAccountPage = new PersonalAccountPage(driver);
 
-        RestAssured.baseURI = BASE_URL;
         User user = UserGenerator.randomUser();
         Response response = userClient.create(user);
         assertEquals(SC_OK, response.statusCode());
@@ -47,25 +44,10 @@ public class LoginTests extends BaseTest {
     @Test
     @DisplayName("Успешный вход по кнопке «Войти в аккаунт» на главной")
     public void loginUsingLoginButtonOnMain() {
-        navigateToMainPage();
-        clickLoginButton();
-        performLogin(email, password);
-        verifyOrderButtonIsVisible();
-    }
-
-    @Step("Переход на главную страницу")
-    private void navigateToMainPage() {
         objRegistrationPage.clickLogoButton();
-    }
-
-    @Step("Клик по кнопке «Войти в аккаунт»")
-    private void clickLoginButton() {
         objMainPage.clickLoginButton();
-    }
-
-    @Step("Выполнение входа с email: {email} и паролем")
-    private void performLogin(String email, String password) {
         objLoginPage.login(email, password);
+        verifyOrderButtonIsVisible();
     }
 
     @Step("Проверка, что кнопка «Оформить заказ» видима")
@@ -78,50 +60,40 @@ public class LoginTests extends BaseTest {
     @Test
     @DisplayName("Успешный вход через кнопку «Личный кабинет»")
     public void loginUsingPersonalAccountButton() {
-        clickPersonalAccountButton();
-        performLogin(email, password);
-        verifyOrderButtonIsVisible();
-    }
-
-    @Step("Клик по кнопке «Личный кабинет»")
-    private void clickPersonalAccountButton() {
         objLoginPage.clickPersonalAccountButton();
+        objLoginPage.login(email, password);
+        verifyOrderButtonIsVisible();
     }
 
     @Test
     @DisplayName("Успешный вход через кнопку в форме регистрации")
     public void loginUsingLoginButtonOnRegistrationForm() {
-        navigateToMainPage();
+        objRegistrationPage.clickLogoButton();
         objMainPage.clickLoginButton();
         objLoginPage.clickRegisterButton();
         objRegistrationPage.clickLoginButton();
-        performLogin(email, password);
+        objLoginPage.login(email, password);
         verifyOrderButtonIsVisible();
     }
 
     @Test
     @DisplayName("Успешный вход через кнопку в форме восстановления пароля")
     public void loginUsingLoginButtonOnPasswordRecovery() {
-        navigateToMainPage();
-        clickLoginButton();
+        objRegistrationPage.clickLogoButton();
+        objMainPage.clickLoginButton();
         objLoginPage.clickPasswordRecoveryButton();
         PasswordRecoveryPage objPasswordRecoveryPage = new PasswordRecoveryPage(driver);
         objPasswordRecoveryPage.clickLoginButton();
-        performLogin(email, password);
+        objLoginPage.login(email, password);
         verifyOrderButtonIsVisible();
     }
 
     @After
     public void tearDown() {
         if (userToken != null) {
-            deleteUser(userToken);
+            userClient.delete(userToken);
         }
         super.tearDown();
-    }
-
-    @Step("Удаление пользователя с токеном: {token}")
-    private void deleteUser(String token) {
-        userClient.delete(token);
     }
 
     private String getUserToken(String email, String password) {

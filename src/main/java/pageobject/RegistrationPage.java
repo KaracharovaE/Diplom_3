@@ -1,5 +1,6 @@
 package pageobject;
 
+import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -38,6 +39,7 @@ public class RegistrationPage {
         driver.findElement(registrationButton).click();
     }
 
+    @Step("Регистрация")
     public void register(String name, String email, String password) {
         setName(name);
         setEmail(email);
@@ -45,16 +47,19 @@ public class RegistrationPage {
         clickRegistrationButton();
     }
 
+    @Step("Ожидание появления текста ошибки 'Некорректный пароль'")
     public String waitPasswordError() {
      return new WebDriverWait(driver, Duration.ofSeconds(3))
             .until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//fieldset[3]/div/p[contains(text(), 'Некорректный пароль')]")))
             .getText();
     }
 
+    @Step("Нажатие на кнопку 'Войти'")
     public void clickLoginButton() {
         driver.findElement(loginButton).click();
     }
 
+    @Step("Нажатие на логотип")
     public void clickLogoButton() {
         driver.findElement(logoButton).click();
     }
